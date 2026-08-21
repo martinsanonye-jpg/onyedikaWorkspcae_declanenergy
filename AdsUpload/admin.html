@@ -22,6 +22,7 @@
       </div>
       <nav class="site-nav">
         <a href="../index.html">Storefront</a>
+        <a href="orders.html">Orders</a>
       </nav>
     </header>
 
@@ -30,6 +31,7 @@
         <span class="eyebrow">Admin</span>
         <h2>Inventory manager</h2>
         <p>Securely add and edit product listings here. Product data is stored in browser storage and used by the public storefront.</p>
+        <a class="admin-page-link" href="orders.html">View all buyer orders</a>
       </div>
       <div class="admin-panel">
         <div id="loginPanel" class="admin-box">
@@ -118,16 +120,6 @@
 
           <div id="adminProductList" class="admin-product-list"></div>
 
-          <section class="admin-orders-section" aria-labelledby="adminOrdersTitle">
-            <div class="admin-top-row">
-              <div>
-                <h3 id="adminOrdersTitle">All buyer orders</h3>
-                <p id="adminOrderCount" class="hint">Loading orders...</p>
-              </div>
-              <button id="refreshAdminOrders" class="button button-secondary" type="button">Refresh orders</button>
-            </div>
-            <div id="adminOrderList" class="admin-order-list"></div>
-          </section>
         </div>
       </div>
     </main>

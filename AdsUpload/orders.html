@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Declan Energy private buyer orders dashboard." />
+  <meta name="robots" content="noindex, nofollow, noarchive" />
+  <title>Buyer Orders - Declan Energy Admin</title>
+  <link rel="icon" type="image/png" sizes="any" href="../logo.png?v=2" />
+  <link rel="stylesheet" href="orders.css" />
+  <script type="module" defer src="orders.js"></script>
+</head>
+<body>
+  <div class="page-shell">
+    <header class="site-header">
+      <div class="brand">
+        <img class="brand-logo" src="../logo.png" alt="Declan Energy logo" />
+        <div>
+          <span class="brand-name">Declan Energy</span>
+          <span class="brand-tagline">Buyer orders</span>
+        </div>
+      </div>
+      <nav class="site-nav">
+        <a href="admin.html">Inventory</a>
+        <a href="../index.html">Storefront</a>
+      </nav>
+      <button id="signOutButton" class="button button-secondary" type="button">Sign out</button>
+    </header>
+
+    <main class="orders-section">
+      <div class="section-heading">
+        <span class="eyebrow">Admin</span>
+        <h1>All buyer orders</h1>
+        <p>Review completed purchases made through the Declan Energy storefront.</p>
+        <a class="admin-page-link" href="admin.html">Manage inventory</a>
+      </div>
+      <section class="orders-panel" aria-labelledby="ordersTitle">
+        <div class="orders-toolbar">
+          <div>
+            <h2 id="ordersTitle">Completed orders</h2>
+            <p id="orderCount" class="hint">Loading orders...</p>
+          </div>
+          <button id="refreshOrdersButton" class="button button-primary" type="button">Refresh orders</button>
+        </div>
+        <div id="orderList" class="order-list"></div>
+      </section>
+    </main>
+  </div>
+</body>
+</html>

@@ -94,6 +94,18 @@ body {
     max-width: 760px
 }
 
+.admin-page-link {
+    display: inline-flex;
+    margin-top: 16px;
+    color: var(--blue);
+    font-weight: 700;
+    text-decoration: none
+}
+
+.admin-page-link:hover {
+    text-decoration: underline
+}
+
 .eyebrow {
     color: var(--green);
     font-weight: 700;
@@ -181,15 +193,13 @@ body {
     color: var(--muted)
 }
 
-.admin-product-list,
-.admin-order-list {
+.admin-product-list {
     display: grid;
     gap: 16px;
     margin-top: 18px
 }
 
-.admin-product-item,
-.admin-order-item {
+.admin-product-item {
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -251,30 +261,6 @@ body {
     box-shadow: 0 8px 18px rgba(185, 28, 28, .16);
 }
 
-.admin-orders-section {
-    margin-top: 34px;
-    padding-top: 28px;
-    border-top: 1px solid var(--border)
-}
-
-.admin-order-item span {
-    display: block;
-    color: var(--muted);
-    font-size: .9rem
-}
-
-.admin-order-meta {
-    display: grid;
-    gap: 5px;
-    justify-items: end;
-    white-space: nowrap
-}
-
-.order-paid {
-    color: #047857;
-    font-weight: 700
-}
-
 .page-footer {
     margin-top: 72px;
     padding: 26px 0;
@@ -307,14 +293,9 @@ body {
         padding: 16px
     }
 
-    .admin-order-item,
     .admin-product-item {
         align-items: stretch;
         flex-direction: column
-    }
-
-    .admin-order-meta {
-        justify-items: start
     }
 
     .button {

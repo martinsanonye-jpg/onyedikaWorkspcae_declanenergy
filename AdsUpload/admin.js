@@ -34,9 +34,6 @@ const adminAccessMessage = document.getElementById('adminAccessMessage');
 const adminUserLabel = document.getElementById('adminUserLabel');
 const adminLoginButton = document.getElementById('adminLoginButton');
 const adminSwitchButton = document.getElementById('adminSwitchButton');
-const adminOrderList = document.getElementById('adminOrderList');
-const adminOrderCount = document.getElementById('adminOrderCount');
-const refreshAdminOrders = document.getElementById('refreshAdminOrders');
 
 let products = [];
 let categories = [];
@@ -237,7 +234,6 @@ function toggleAdminDashboard() {
     loginPanel.classList.add('hidden');
     adminDashboard.classList.remove('hidden');
     renderAdminProducts();
-    loadAdminOrders();
   } else {
     loginPanel.classList.remove('hidden');
     adminDashboard.classList.add('hidden');
@@ -245,64 +241,6 @@ function toggleAdminDashboard() {
   }
 }
 
-refreshAdminOrders?.addEventListener('click', loadAdminOrders);
-
-function escapeHtml(value) {
-  return String(value ?? '').replace(/[&<>'"]/g, (character) => ({
-    '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;',
-  }[character]));
-}
-
-async function loadAdminOrders() {
-  if (!adminOrderList) return;
-  adminOrderList.innerHTML = '<p class="empty-state">Loading orders...</p>';
-
-  try {
-    const snapshot = await get(ref(db, 'orders'));
-    const orders = [];
-    if (snapshot.exists()) {
-      Object.values(snapshot.val()).forEach((customerOrders) => {
-        if (customerOrders && typeof customerOrders === 'object') {
-          Object.values(customerOrders).forEach((order) => orders.push(order));
-        }
-      });
-    }
-    orders.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
-    renderAdminOrders(orders);
-  } catch (error) {
-    console.error('Unable to load orders:', error);
-    adminOrderList.innerHTML = '<p class="empty-state">Unable to load orders. Check Firebase database permissions.</p>';
-    if (adminOrderCount) adminOrderCount.textContent = 'Orders unavailable';
-  }
-}
-
-function renderAdminOrders(orders) {
-  if (!adminOrderList) return;
-  adminOrderList.innerHTML = '';
-  if (adminOrderCount) adminOrderCount.textContent = `${orders.length} completed order${orders.length === 1 ? '' : 's'}`;
-
-  if (!orders.length) {
-    adminOrderList.innerHTML = '<p class="empty-state">No completed orders yet.</p>';
-    return;
-  }
-
-  orders.forEach((order) => {
-    const item = document.createElement('div');
-    item.className = 'admin-order-item';
-    const date = order.createdAt ? new Date(order.createdAt).toLocaleString() : 'Date unavailable';
-    item.innerHTML = `
-      <div>
-        <strong>${escapeHtml(order.productName)}</strong>
-        <span>${escapeHtml(order.customerEmail)} · ${escapeHtml(order.paymentMethod)} · ${escapeHtml(date)}</span>
-      </div>
-      <div class="admin-order-meta">
-        <strong>₦${Number(order.amount || 0).toLocaleString()}</strong>
-        <span class="order-paid">Paid</span>
-      </div>
-    `;
-    adminOrderList.appendChild(item);
-  });
-}
 
 function renderAdminProducts() {
   adminProductList.innerHTML = '';
