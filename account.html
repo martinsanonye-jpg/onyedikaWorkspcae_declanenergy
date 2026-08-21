@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="View your Declan Energy purchases and completed orders." />
+  <meta name="robots" content="noindex, nofollow, noarchive" />
+  <title>My Account - Declan Energy</title>
+  <link rel="icon" type="image/png" sizes="any" href="logo.png?v=2" />
+  <link rel="stylesheet" href="account.css" />
+  <script type="module" defer src="account.js"></script>
+</head>
+<body>
+  <div class="page-shell">
+    <header class="site-header account-page-header" id="top">
+      <a class="brand" href="index.html" aria-label="Declan Energy storefront">
+        <img class="brand-logo" src="logo.png" alt="Declan Energy logo" />
+        <span>
+          <span class="brand-name">Declan Energy</span>
+          <span class="brand-tagline">Buyer account</span>
+        </span>
+      </a>
+      <nav class="site-nav">
+        <a href="index.html">Storefront</a>
+        <a href="index.html#shop">Products</a>
+      </nav>
+      <div class="account-panel">
+        <div id="accountStatus">Not signed in</div>
+        <button id="googleSignInBtn" class="button button-secondary" type="button">Sign in with Google</button>
+        <button id="signOutBtn" class="button button-primary hidden" type="button">Sign Out</button>
+      </div>
+    </header>
+
+    <main>
+      <section class="buyer-dashboard account-page-section" aria-labelledby="buyerDashboardTitle">
+        <div class="dashboard-heading">
+          <div>
+            <span class="eyebrow">Buyer account</span>
+            <h1 id="buyerDashboardTitle">My orders</h1>
+            <p id="buyerOrderStatus">Sign in to view your orders.</p>
+          </div>
+          <a class="button button-primary" href="index.html#shop">Continue shopping</a>
+        </div>
+        <div id="buyerOrderList" class="buyer-order-list">
+          <p class="empty-orders">Sign in to view your completed orders.</p>
+        </div>
+      </section>
+    </main>
+
+    <footer class="page-footer">
+      <p><strong>Declan Energy</strong> — Solar panels, inverters, smart power and electrical systems.</p>
+    </footer>
+  </div>
+</body>
+</html>

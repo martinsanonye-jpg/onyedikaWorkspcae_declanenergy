@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Declan Energy private product inventory management dashboard." />
+  <meta name="robots" content="noindex, nofollow, noarchive" />
+  <title>Declan Energy Admin</title>
+  <link rel="icon" type="image/png" sizes="any" href="../logo.png?v=2" />
+  <link rel="stylesheet" href="admin.css" />
+  <script type="module" defer src="admin.js"></script>
+</head>
+<body>
+  <div class="page-shell">
+    <header class="site-header admin-page-header">
+      <div class="brand">
+        <img class="brand-logo" src="../logo.png" alt="Declan Energy logo" />
+        <div>
+          <span class="brand-name">Declan Energy</span>
+          <span class="brand-tagline">Manage product inventory for Declan Energy</span>
+        </div>
+      </div>
+      <nav class="site-nav">
+        <a href="../index.html">Storefront</a>
+      </nav>
+    </header>
+
+    <main class="admin-section admin-page-section">
+      <div class="section-heading">
+        <span class="eyebrow">Admin</span>
+        <h2>Inventory manager</h2>
+        <p>Securely add and edit product listings here. Product data is stored in browser storage and used by the public storefront.</p>
+      </div>
+      <div class="admin-panel">
+        <div id="loginPanel" class="admin-box">
+          <h3>Admin access required</h3>
+          <p id="adminAccessMessage">Please sign in using your email to access the admin dashboard.</p>
+          <p id="adminUserLabel" class="hint">Not signed in yet.</p>
+          <div class="form-actions">
+            <button id="adminLoginButton" class="button button-primary" type="button">Sign in now</button>
+            <button id="adminSwitchButton" class="button button-secondary hidden" type="button">Switch account</button>
+          </div>
+        </div>
+
+        <div id="adminDashboard" class="admin-box hidden">
+          <div class="admin-top-row">
+            <div>
+              <h3>Products managed</h3>
+              <p id="adminProductCount">0 products available</p>
+            </div>
+            <div class="admin-actions-row">
+              <div>
+                <button id="dropboxAuthBtn" class="button button-secondary">Connect Dropbox</button>
+                <div id="dropboxStatus" class="hint" style="margin-top:8px; font-size:0.95rem; color:#6b7280;">Dropbox auth required before uploading image files.</div>
+              </div>
+              <button id="adminLogoutBtn" class="button button-secondary">Sign out</button>
+            </div>
+          </div>
+
+          <form id="adminProductForm" class="admin-form">
+            <div class="form-grid">
+              <label>
+                Product title
+                <input id="productName" type="text" placeholder="Solar panel kit" required />
+              </label>
+              <label>
+                Price (NGN)
+                <input id="productPrice" type="number" min="0" placeholder="120000" required />
+              </label>
+              <label>
+                Category
+                <select id="productCategory" required>
+                  <option value="">Select a category</option>
+                </select>
+              </label>
+              <label>
+                Add new category
+                <div class="category-inline-row">
+                  <input id="newCategoryName" type="text" placeholder="e.g. Inverter" />
+                  <button id="addCategoryBtn" type="button" class="button button-secondary">Add</button>
+                </div>
+              </label>
+              <label>
+                Image URL
+                <input id="productImageUrl" type="url" placeholder="https://..." />
+              </label>
+              <label>
+                Or choose image file
+                <input id="productImageFile" type="file" accept="image/*" />
+              </label>
+              <label>
+                Support image URLs
+                <input id="supportImageUrls" type="text" placeholder="https://... , https://..." />
+              </label>
+              <label>
+                Or choose support image files
+                <input id="supportImageFiles" type="file" accept="image/*" multiple />
+              </label>
+              <label>
+                Video URL
+                <input id="productVideoUrl" type="url" placeholder="https://..." />
+              </label>
+              <label>
+                Or choose video file
+                <input id="productVideoFile" type="file" accept="video/*" />
+              </label>
+            </div>
+            <label>
+              Description
+              <textarea id="productDescription" rows="4" placeholder="Describe the product." required></textarea>
+            </label>
+            <div class="form-actions">
+              <button type="submit" class="button button-primary">Save product</button>
+              <button id="clearAdminForm" type="button" class="button button-secondary">Clear form</button>
+            </div>
+            <div id="adminFormMessage" class="form-message"></div>
+          </form>
+
+          <div id="adminProductList" class="admin-product-list"></div>
+
+          <section class="admin-orders-section" aria-labelledby="adminOrdersTitle">
+            <div class="admin-top-row">
+              <div>
+                <h3 id="adminOrdersTitle">All buyer orders</h3>
+                <p id="adminOrderCount" class="hint">Loading orders...</p>
+              </div>
+              <button id="refreshAdminOrders" class="button button-secondary" type="button">Refresh orders</button>
+            </div>
+            <div id="adminOrderList" class="admin-order-list"></div>
+          </section>
+        </div>
+      </div>
+    </main>
+
+    <footer class="page-footer">
+      <div>
+        <p><strong>Declan Energy</strong> Admin dashboard.</p>
+      </div>
+      <div class="footer-links">
+        <a href="../index.html">Storefront</a>
+      </div>
+    </footer>
+  </div>
+</body>
+</html>

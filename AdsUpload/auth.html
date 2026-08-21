@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="description" content="Sign in securely to manage your Declan Energy account." />
+    <meta name="robots" content="noindex, nofollow, noarchive">
+    <meta name="theme-color" content="#0f4c81">
+    <title>Sign In - Declan Energy</title>
+    <link rel="icon" type="image/png" sizes="any" href="../logo.png?v=2">
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .auth-page {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            z-index: 9999;
+        }
+        .auth-card {
+            background: var(--surface);
+            border-radius: 12px;
+            padding: 28px;
+            box-shadow: var(--shadow-lg);
+            max-width: 420px;
+            width: 100%;
+            text-align: center;
+            color: var(--text-primary);
+        }
+        .auth-card h2 {
+            color: var(--text-primary);
+            margin-bottom: 8px;
+        }
+        .auth-card p {
+            color: var(--text-secondary);
+        }
+        .firebase-signin-button {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 18px;
+            border-radius: 8px;
+            border: none;
+            background: white;
+            cursor: pointer;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+        .error-message { color: var(--error-color); margin-top: 12px; }
+        #g_id_onload { display: none; }
+    </style>
+</head>
+<body>
+    <div class="auth-page">
+        <div class="auth-card">
+            <h2>Sign In to CloudVault</h2>
+            <p>Verify your email to access the main app.</p>
+            <div id="signinArea">
+                <div style="margin-bottom: 16px;">
+                    <input type="email" id="emailInput" placeholder="Enter your email" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px; box-sizing: border-box;">
+                </div>
+                <button id="submitBtn" style="width: 100%; padding: 12px; background: #4285F4; color: white; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; font-size: 16px;">
+                    Verify Email
+                </button>
+                <button id="googleBtn" style="width: 100%; margin-top: 12px; padding: 12px; background: white; color: #1f2937; border: 1px solid #d1d5db; border-radius: 6px; font-weight: 600; cursor: pointer; font-size: 16px; display: flex; align-items: center; justify-content: center; gap: 10px;">
+                    <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google" width="20" height="20" />
+                    Sign in with Google
+                </button>
+                
+                <div id="spinner" style="display:none; text-align: center; margin-top: 16px;">
+                    <div style="border: 3px solid #f3f3f3; border-top: 3px solid #4285F4; border-radius: 50%; width: 30px; height: 30px; animation: spin 1s linear infinite; margin: 0 auto;"></div>
+                    <p id="spinnerText" style="margin-top: 8px; font-size: 14px; color: #666;"></p>
+                </div>
+                <style>
+                    @keyframes spin {
+                        0% { transform: rotate(0deg); }
+                        100% { transform: rotate(360deg); }
+                    }
+                </style>
+            </div>
+            <div id="authMessage" class="error-message" style="display:none;"></div>
+        </div>
+    </div>
+
+    <script type="module">
+    import { AUTHORIZED_EMAIL, FIREBASE_CONFIG } from './auth-config.js';
+    import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js';
+    import { getAuth, GoogleAuthProvider, signInWithPopup } from 'https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js';
+
+    const emailInput = document.getElementById('emailInput');
+    const submitBtn = document.getElementById('submitBtn');
+    const googleBtn = document.getElementById('googleBtn');
+    const authMessage = document.getElementById('authMessage');
+    const spinner = document.getElementById('spinner');
+    const spinnerText = document.getElementById('spinnerText');
+
+    const firebaseApp = initializeApp(FIREBASE_CONFIG);
+    const auth = getAuth(firebaseApp);
+    const provider = new GoogleAuthProvider();
+
+    function showMessage(msg) {
+        authMessage.style.display = msg ? 'block' : 'none';
+        authMessage.textContent = msg || '';
+    }
+
+    function showSpinner(msg) {
+        spinner.style.display = 'block';
+        spinnerText.textContent = msg || 'Processing...';
+    }
+
+    function hideSpinner() {
+        spinner.style.display = 'none';
+    }
+
+    function normalizeEmail(value) {
+        return value.trim().toLowerCase();
+    }
+
+    function saveUser(email) {
+        const normalizedEmail = normalizeEmail(email);
+        localStorage.setItem('declanEnergyUserEmail', normalizedEmail);
+        localStorage.setItem('declanEnergyIsAdmin', String(normalizedEmail === normalizeEmail(AUTHORIZED_EMAIL)));
+    }
+
+    function getRedirectTarget() {
+        const params = new URLSearchParams(window.location.search);
+        const target = params.get('returnTo') || params.get('redirect');
+        return target ? target : '../index.html';
+    }
+
+    function redirectToStore() {
+        showSpinner('Signed in successfully. Redirecting...');
+        const ts = Date.now();
+        const target = getRedirectTarget();
+        const separator = target.includes('?') ? '&' : '?';
+        setTimeout(() => {
+            window.location.href = `${target}${separator}auth=done&ts=${ts}`;
+        }, 600);
+    }
+
+    submitBtn.addEventListener('click', async () => {
+        const email = emailInput.value.trim();
+        showMessage('');
+        hideSpinner();
+
+        if (!email) {
+            showMessage('Please enter your email');
+            return;
+        }
+
+        showSpinner('Signing in...');
+        saveUser(email);
+        redirectToStore();
+    });
+
+    googleBtn.addEventListener('click', async () => {
+        showMessage('');
+        showSpinner('Opening Google sign-in...');
+
+        try {
+            const result = await signInWithPopup(auth, provider);
+            const email = result.user?.email || '';
+            if (!email) {
+                throw new Error('Unable to read Google account email.');
+            }
+            saveUser(email);
+            redirectToStore();
+        } catch (error) {
+            hideSpinner();
+            showMessage(error.message || 'Google sign-in failed.');
+        }
+    });
+
+    // Allow Enter key to submit
+    emailInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+            submitBtn.click();
+        }
+    });
+
+    emailInput.focus();
+    </script>
+</body>
+</html>

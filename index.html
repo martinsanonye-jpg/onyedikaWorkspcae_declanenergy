@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Shop solar panels, hybrid inverters, smart energy controllers, and electrical power systems from Declan Energy." />
+  <meta name="keywords" content="solar panels, hybrid inverters, solar energy, smart energy devices, electrical systems, Nigeria" />
+  <meta name="author" content="Declan Energy" />
+  <meta name="theme-color" content="#0f4c81" />
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="Declan Energy Store" />
+  <meta property="og:description" content="Reliable solar panels, inverters, smart energy devices, and electrical power solutions." />
+  <meta property="og:image" content="logo.png" />
+  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:title" content="Declan Energy Store" />
+  <meta name="twitter:description" content="Shop reliable solar and electrical power solutions from Declan Energy." />
+  <meta name="twitter:image" content="logo.png" />
+  <title>Declan Energy Store | Solar & Electrical Power Solutions</title>
+  <link rel="icon" type="image/png" sizes="any" href="logo.png?v=2" />
+  <link rel="stylesheet" href="index.css" />
+  <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Organization",
+      "name": "Declan Energy",
+      "description": "Solar panels, hybrid inverters, smart energy devices, and electrical power solutions.",
+      "logo": "logo.png"
+    }
+  </script>
+  <script defer src="https://js.paystack.co/v2/inline.js"></script>
+  <script defer src="https://checkout.flutterwave.com/v3.js"></script>
+  <script type="module" defer src="app.js"></script>
+</head>
+<body>
+  <div class="page-shell">
+    <header class="site-header" id="top">
+      <div class="brand">
+        <img class="brand-logo" src="logo.png" alt="Declan Energy logo" />
+        <div>
+          <span class="brand-name">Declan Energy</span>
+          <span class="brand-tagline">Solar panels, inverters, smart devices and electrical power systems.</span>
+        </div>
+      </div>
+      <nav class="site-nav">
+        <a href="#home">Home</a>
+        <a href="#shop">Products</a>
+        <a href="#contact">Contact</a>
+       
+      </nav>
+      <div class="account-panel" id="accountPanel">
+        <div id="accountStatus">Not signed in</div>
+        <button id="googleSignInBtn" class="button button-secondary" style="background-color:black; color:white">Sign in with Google</button>
+        <a id="dashboardButton" class="button button-secondary hidden" href="account.html">My Dashboard</a>
+        <button id="signOutBtn" class="button button-primary hidden">Sign Out</button>
+      </div>
+    </header>
+
+    <main>
+      <section id="home" class="hero-section">
+        <div class="hero-visual">
+          <div class="hero-slider" aria-label="Hero image slideshow">
+            <div class="hero-slide active">
+              <img src="images/Declan Energy image 3.jpg" alt="Solar panels in a clean energy installation" />
+            </div>
+            <div class="hero-slide">
+              <img src="images/Declan Energy Image 4.jpg" alt="Energy storage and inverter system" />
+            </div>
+            <div class="hero-slide">
+              <img src="images/Declan Energy Image 5.jpg" alt="Smart solar energy management" />
+            </div>
+            <div class="hero-slide">
+              <img src="images/Declan Energy Image 6.jpg" alt="Commercial solar equipment and canopies" />
+            </div>
+            <div class="hero-slide">
+              <img src="images/Declan Energy Image 7.jpg" alt="Clean energy system installation" />
+            </div>
+            <div class="hero-slider-overlay">
+              <div class="hero-slider-copy">
+                <h2>Built for performance</h2>
+                <p>Choose solar modules, hybrid inverters, smart energy controllers and electrical devices matched to your power needs.</p>
+              </div>
+              <div class="hero-slider-indicators" aria-label="Slide navigation">
+                <button class="hero-dot active" type="button" aria-label="Show slide 1"></button>
+                <button class="hero-dot" type="button" aria-label="Show slide 2"></button>
+                <button class="hero-dot" type="button" aria-label="Show slide 3"></button>
+                <button class="hero-dot" type="button" aria-label="Show slide 4"></button>
+                <button class="hero-dot" type="button" aria-label="Show slide 5"></button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="hero-copy compact-hero-copy">
+          <span class="eyebrow">Clean energy built to last</span>
+          <h1>Solar power, inverter systems and smart device solutions for homes and businesses.</h1>
+          <p>Explore premium solar products with modern digital checkout using Paystack and Flutterwave. Designed for efficiency, resilience and a professional energy experience.</p>
+          <div class="hero-actions">
+            <a href="#shop" class="button button-primary">Explore Products</a>
+            <a href="#contact" class="button button-secondary">Contact Sales</a>
+          </div>
+        </div>
+      </section>
+
+      <section class="shop-tools" aria-label="Product search">
+        <div class="search-box">
+          <span class="search-icon">⌕</span>
+          <input id="productSearch" type="search" placeholder="Search products, categories or descriptions" aria-label="Search products" />
+        </div>
+        <div class="shop-filter-box">
+          <label for="productCategoryFilter">Category</label>
+          <select id="productCategoryFilter">
+            <option value="all">All categories</option>
+          </select>
+        </div>
+        <div id="searchResultsCount" class="search-meta">Showing all products</div>
+      </section>
+
+      <section id="shop" class="product-section">
+        <div class="section-heading">
+          <span class="eyebrow">Storefront</span>
+          <h2>Products available for purchase</h2>
+          <p>Pay instantly with Paystack or Flutterwave. Product inventory is managed from the admin dashboard.</p>
+        </div>
+        <div id="productGrid" class="product-grid"></div>
+      </section>
+
+      <section class="features-section">
+        <div class="feature-card feature-blue">
+          <h3>Solar Panels</h3>
+          <p>Premium solar modules for consistent generation and long life.</p>
+        </div>
+        <div class="feature-card feature-green">
+          <h3>Inverters</h3>
+          <p>Hybrid inverters with backup power options and seamless switching.</p>
+        </div>
+        <div class="feature-card feature-white">
+          <h3>Smart Devices</h3>
+          <p>Energy monitoring and automation tools for efficient consumption.</p>
+        </div>
+      </section>
+
+      <section id="contact" class="contact-section">
+        <div class="section-heading">
+          <span class="eyebrow">Contact</span>
+          <h2>Connect with our support team</h2>
+          <p>Update contact information in <code>app.js</code> anytime for your current details.</p>
+        </div>
+        <div class="contact-grid">
+          <div class="contact-card">
+            <h3>Email</h3>
+            <a id="contactEmail" href="mailto:declanenergytechnologies@gmailcom">declanenergytechnologies@gmailcom</a>
+          </div>
+          <div class="contact-card">
+            <h3>WhatsApp</h3>
+            <a id="contactWhatsapp" href="https://wa.me/2348028395501">+234 802 839 5501</a>
+          </div>
+          <div class="contact-card">
+            <h3>Phone</h3>
+            <a id="contactPhone" href="tel:+2348028395501">+234 802 839 5501</a>
+          </div>
+          <div class="contact-card">
+            <h3>Facebook</h3>
+            <a id="contactFacebook" href="https://facebook.com/declanenergy" target="_blank" rel="noreferrer">facebook.com/declanenergy</a>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="page-footer">
+      <div>
+        <p><strong>Declan Energy</strong> — Solar panels, inverters, smart power and electrical systems.</p>
+      </div>
+      <div class="footer-links">
+        <a href="#home">Home</a>
+        <a href="#shop">Products</a>
+        <a href="#contact">Contact</a>
+      </div>
+    </footer>
+  </div>
+</body>
+</html>

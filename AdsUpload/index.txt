@@ -1,0 +1,714 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CloudVault - File Upload Manager</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- Auth handled in separate auth.html -->
+    <!-- Debug: Show loading/auth status -->
+    <div id="authStatus" style="display: block; position: fixed; top: 20px; right: 20px; padding: 12px; background: #f0f0f0; border-radius: 6px; font-size: 12px; z-index: 10000; max-width: 300px;">
+        <div style="font-weight: 600; margin-bottom: 8px;">🔄 Checking authentication...</div>
+        <div id="authStatusText" style="color: #666; font-size: 11px; line-height: 1.4;">Verifying credentials...</div>
+    </div>
+
+    <!-- Main App Container -->
+    <div id="mainContainer" class="main-container" style="display: none;">
+        <!-- Sidebar Navigation (optional future use) -->
+        <nav class="sidebar">
+            <div class="sidebar-header">
+                <div class="logo">☁️ CloudVault</div>
+            </div>
+            <div class="sidebar-user">
+                <div class="user-avatar">👤</div>
+                <div class="user-info">
+                    <div class="user-email" id="userEmail"></div>
+                </div>
+            </div>
+            <button id="signOutBtn" class="logout-btn">Sign Out</button>
+        </nav>
+
+        <!-- Main Content Area -->
+        <div class="main-content">
+            <!-- Header -->
+            <header class="app-header">
+                <div class="header-content">
+                    <h1>File Upload Manager</h1>
+                    <p>Securely upload and manage your files with Dropbox + Firebase</p>
+                </div>
+            </header>
+
+            <!-- Content Grid -->
+            <div class="content-wrapper">
+                <!-- Left Column -->
+                <div class="left-column">
+                    <!-- Upload Card -->
+                    <div class="card upload-card">
+                        <div class="card-header">
+                            <h2>📤 Upload Files</h2>
+                        </div>
+                        <div class="card-body">
+                            <div class="upload-area" id="uploadBox">
+                                <div class="upload-icon-large">📁</div>
+                                <h3>Drop files here</h3>
+                                <p>or click to browse</p>
+                                <input type="file" id="fileInput" multiple accept="*/*" style="display: none;">
+                                <input type="file" id="bannerInput" multiple accept="image/jpeg,image/png,image/gif,image/webp" style="display: none;">
+                                <input type="file" id="fullimageInput" multiple accept="image/jpeg,image/png,image/gif,image/webp,image/bmp" style="display: none;">
+                                <input type="file" id="videoInput" multiple accept="video/mp4,video/webm,video/ogg,video/quicktime,video/x-msvideo" style="display: none;">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- File Type Selection Card -->
+                    <div class="card file-types-card">
+                        <div class="card-header">
+                            <h2>📋 File Type</h2>
+                        </div>
+                        <div class="card-body">
+                            <div class="file-type-grid">
+                                <button class="file-type-btn" data-type="all" title="All Files">
+                                    <span class="type-icon">📁</span>
+                                    <span class="type-label">All</span>
+                                </button>
+                                <button class="file-type-btn" data-type="text" title="Text Ads">
+                                    <span class="type-icon">✏️</span>
+                                    <span class="type-label">Text</span>
+                                </button>
+                                <button class="file-type-btn" data-type="banner" title="Banner Images">
+                                    <span class="type-icon">🖼️</span>
+                                    <span class="type-label">Banner</span>
+                                </button>
+                                <button class="file-type-btn" data-type="fullimage" title="Full Size Images">
+                                    <span class="type-icon">🌅</span>
+                                    <span class="type-label">Image</span>
+                                </button>
+                                <button class="file-type-btn" data-type="video" title="Video Files">
+                                    <span class="type-icon">🎥</span>
+                                    <span class="type-label">Video</span>
+                                </button>
+                            </div>
+                            
+                            <!-- Ads Redirect Link Input -->
+                            <div style="margin-top: 20px;">
+                                <label style="display: block; font-weight: 600; margin-bottom: 8px; color: #1e293b;">🔗 Ads Redirect Link (Optional)</label>
+                                <input type="url" id="adsRedirectLink" placeholder="https://example.com/redirect" style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 14px; box-sizing: border-box;">
+                                <p style="font-size: 12px; color: #64748b; margin-top: 6px;">Enter the URL where users should be redirected when they click on this ad</p>
+                            </div>
+
+                            <!-- Expiration Input -->
+                            <div style="margin-top: 20px;">
+                                <label style="display: block; font-weight: 600; margin-bottom: 8px; color: #1e293b;">⏳ Expire After (days)</label>
+                                <input type="number" id="adsExpireDays" min="0" step="1" value="30" style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 14px; box-sizing: border-box;">
+                                <p style="font-size: 12px; color: #64748b; margin-top: 6px;">Number of days after upload when this ad should be considered expired. Set to 0 for no expiration.</p>
+                            </div>
+                            
+                            <!-- Text Ad Input -->
+                            <div id="textAdSection" style="margin-top: 16px; display:none; opacity:0.6;">
+                                <label style="display:block; font-weight:600; margin-bottom:8px; color:#1e293b;">✏️ Text Ad</label>
+                                <textarea id="textAdContent" placeholder="Enter short promotional text for this ad" rows="4" style="width:100%; padding:10px; border:1px solid #cbd5e1; border-radius:6px; font-size:14px; box-sizing:border-box;" disabled></textarea>
+                                <div style="display:flex;justify-content:space-between;align-items:center;margin-top:8px;gap:8px;">
+                                    <small style="color:#64748b;">Short text up to 500 characters</small>
+                                    <button id="saveTextAdBtn" style="padding:8px 12px;background:#2563eb;color:white;border:none;border-radius:6px;cursor:pointer;font-size:0.9rem;" disabled>Save Text Ad</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Column -->
+                <div class="right-column">
+                    <!-- Queue Card -->
+                    <div class="card queue-card">
+                        <div class="card-header">
+                            <h2>📑 Queue</h2>
+                            <span class="queue-count" id="queueCount">0</span>
+                        </div>
+                        <div class="card-body">
+                            <div class="file-list" id="fileList">
+                                <div class="empty-state">No files selected</div>
+                            </div>
+                        </div>
+                        <div class="card-footer">
+                            <button class="upload-btn" id="uploadBtn" disabled>Upload All</button>
+                        </div>
+                    </div>
+
+                    <!-- Upload Progress Card -->
+                    <div class="card progress-card" id="progressCard" style="display: none;">
+                        <div class="card-header">
+                            <h2>⏳ Progress</h2>
+                        </div>
+                        <div class="card-body">
+                            <div class="progress-container">
+                                <div class="progress-bar">
+                                    <div class="progress-fill" id="progressFill"></div>
+                                </div>
+                                <div class="progress-stats">
+                                    <span class="progress-text" id="progressText">0%</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Results Card -->
+                    <div class="card results-card">
+                        <div class="card-header">
+                            <h2>✅ Results</h2>
+                        </div>
+                        <div class="card-body">
+                            <div class="results-list" id="resultsList">
+                                <div class="empty-state">No uploads yet</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Database Section (Full Width) -->
+            <div class="card database-card" style="margin-top: 20px;">
+                <div class="card-header">
+                    <h2>📊 Database Files</h2>
+                    <button class="view-database-btn" id="viewDatabaseBtn">View Files</button>
+                </div>
+                <div class="card-body">
+                    <div class="database-container" id="databaseContainer" style="display: none;">
+                        <div class="database-list" id="databaseList">
+                            <div class="empty-state">No files in database</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notifications -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <!-- Single merged logic block: Auth, Upload, Dropbox, Firebase, UI -->
+    <script type="module">
+    import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js';
+    import { getAuth, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js';
+    import { getDatabase, ref, push, set, get, remove } from 'https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js';
+    import { getValidDropboxToken, initiateOAuthLogin, clearDropboxTokens } from './dropbox-oauth-handler.js';
+    import NAVIGATION_CONFIG from './navigation-config.js';
+    import DROPBOX_CONFIG from './dropbox-config.js';
+
+    // Firebase config
+var firebaseConfig ;
+// = {
+//       apiKey: "AIzaSyDL1Y2OG9dbR_7UN90SlQJPar83luUsPGA",
+//     authDomain: "declan-energy.firebaseapp.com",
+//     databaseURL: "https://declan-energy-default-rtdb.firebaseio.com",
+//     projectId: "declan-energy",
+//     storageBucket: "declan-energy.firebasestorage.app",
+//     messagingSenderId: "827624560547",
+//     appId: "1:827624560547:web:e0ab9078f935c6315eac16",
+//     measurementId: "G-HM6QYBW8XD"
+// };
+
+
+    import { AUTHORIZED_EMAIL, FIREBASE_CONFIG } from './auth-config.js';
+
+    firebaseConfig =FIREBASE_CONFIG;
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getDatabase(app);
+
+    // DOM Elements
+    const mainContainer = document.getElementById('mainContainer');
+    const userEmailSpan = document.getElementById('userEmail');
+    const signOutBtn = document.getElementById('signOutBtn');
+    const uploadBox = document.getElementById('uploadBox');
+    const fileInput = document.getElementById('fileInput');
+    const fileList = document.getElementById('fileList');
+    const queueCount = document.getElementById('queueCount');
+    const uploadBtn = document.getElementById('uploadBtn');
+    const resultsList = document.getElementById('resultsList');
+    const adsRedirectLinkInput = document.getElementById('adsRedirectLink');
+    const textAdContent = document.getElementById('textAdContent');
+    const saveTextAdBtn = document.getElementById('saveTextAdBtn');
+    const textAdSection = document.getElementById('textAdSection');
+    const fileTypeButtons = document.querySelectorAll('.file-type-btn');
+    let selectedFiles = [];
+    let selectedFileType = 'all';
+
+    // Auth logic
+    function showMainFor(email) {
+        const authStatus = document.getElementById('authStatus');
+        if (authStatus) authStatus.style.display = 'none';
+        if (mainContainer) mainContainer.style.display = 'block';
+        if (userEmailSpan) userEmailSpan.textContent = `Signed in as: ${email}`;
+        if (signOutBtn) signOutBtn.style.display = 'inline-block';
+        if (signOutBtn && !signOutBtn._wired) {
+            signOutBtn.addEventListener('click', async () => {
+                try { await signOut(auth); } catch(e) { console.warn(e); }
+                clearDropboxTokens();
+                NAVIGATION_CONFIG.redirectToAuth();
+            });
+            signOutBtn._wired = true;
+        }
+    }
+    (async () => {
+        const params = new URLSearchParams(window.location.search);
+        const fromAuth = params.get('auth') === 'done';
+        const storedEmail = localStorage.getItem('cloudvault_user_email');
+        if (fromAuth && storedEmail === AUTHORIZED_EMAIL) {
+            try { 
+                localStorage.removeItem('cloudvault_user_email'); 
+                localStorage.removeItem('cloudvault_auth_attempt');
+                localStorage.removeItem('cloudvault_id_token');
+            } catch(_) {}
+            params.delete('auth'); params.delete('ts');
+            const newUrl = window.location.pathname + (params.toString() ? '?' + params.toString() : '');
+            history.replaceState(null, '', newUrl);
+            showMainFor(storedEmail);
+            return;
+        }
+        onAuthStateChanged(auth, (user) => {
+            const authStatus = document.getElementById('authStatus');
+            const authStatusText = document.getElementById('authStatusText');
+            
+            if (user) {
+                console.log('[Auth] User detected:', user.email);
+                if (user.email === AUTHORIZED_EMAIL) {
+                    console.log('[Auth] ✓ Authorized email');
+                    showMainFor(user.email);
+                } else {
+                    console.log('[Auth] ✗ Unauthorized email:', user.email);
+                    if (authStatusText) {
+                        authStatusText.innerHTML = `<span style="color: #ef4444;">⚠️ Unauthorized email: ${user.email}</span><br/>Expected: ${AUTHORIZED_EMAIL}`;
+                    }
+                    setTimeout(() => NAVIGATION_CONFIG.redirectToAuth(), 2000);
+                }
+            } else {
+                console.log('[Auth] No user - redirecting to auth');
+                if (authStatusText) {
+                    authStatusText.innerHTML = `<span style="color: #f97316;">📝 Redirecting to login...</span>`;
+                }
+                setTimeout(() => NAVIGATION_CONFIG.redirectToAuth(), 1500);
+            }
+        });
+    })();
+
+    // File drag/drop and selection
+    uploadBox.addEventListener('click', () => fileInput.click());
+    uploadBox.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        uploadBox.classList.add('dragover');
+    });
+    uploadBox.addEventListener('dragleave', () => {
+        uploadBox.classList.remove('dragover');
+    });
+    uploadBox.addEventListener('drop', (e) => {
+        e.preventDefault();
+        uploadBox.classList.remove('dragover');
+        const files = Array.from(e.dataTransfer.files);
+        addFilesToQueue(files);
+    });
+    fileInput.addEventListener('change', (e) => {
+        const files = Array.from(e.target.files);
+        addFilesToQueue(files);
+    });
+    function addFilesToQueue(files) {
+        selectedFiles = [...selectedFiles, ...files];
+        updateFileList();
+        uploadBtn.disabled = selectedFiles.length === 0;
+    }
+    function updateFileList() {
+        if (selectedFiles.length === 0) {
+            fileList.innerHTML = '<div class="empty-state">No files selected</div>';
+            queueCount.textContent = '0';
+            return;
+        }
+        queueCount.textContent = selectedFiles.length;
+        fileList.innerHTML = selectedFiles.map((file, idx) => `
+            <div class="file-item">
+                <div class="file-info">
+                    <span class="file-name">${file.name}</span>
+                    <span class="file-size">${(file.size / 1024 / 1024).toFixed(2)} MB</span>
+                </div>
+                <button class="delete-btn" onclick="window.removeFile(${idx})">✕</button>
+            </div>
+        `).join('');
+    }
+    window.removeFile = (idx) => {
+        selectedFiles.splice(idx, 1);
+        updateFileList();
+        uploadBtn.disabled = selectedFiles.length === 0;
+    };
+
+    // File type selection
+    fileTypeButtons.forEach(btn => {
+        btn.addEventListener('click', () => {
+            fileTypeButtons.forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            selectedFileType = btn.dataset.type;
+            
+            // Enable/disable text ad section based on selection
+            if (selectedFileType === 'text') {
+                textAdSection.style.display = 'block';
+                textAdSection.style.opacity = '1';
+                textAdContent.disabled = false;
+                saveTextAdBtn.disabled = false;
+            } else {
+                textAdSection.style.display = 'none';
+                textAdSection.style.opacity = '0.6';
+                textAdContent.disabled = true;
+                saveTextAdBtn.disabled = true;
+            }
+        });
+    });
+
+    // Simple toast helper
+    function showToast(message, duration = 3000) {
+        const container = document.getElementById('toastContainer');
+        if (!container) { alert(message); return; }
+        const toast = document.createElement('div');
+        toast.className = 'toast';
+        toast.textContent = message;
+        toast.style.cssText = 'background:#111827;color:#fff;padding:8px 12px;border-radius:6px;margin-top:8px;box-shadow:0 2px 6px rgba(0,0,0,0.15);';
+        container.appendChild(toast);
+        setTimeout(() => { try { container.removeChild(toast); } catch(_) {} }, duration);
+    }
+
+    // Save Text Ad to Firebase
+    if (saveTextAdBtn) {
+        saveTextAdBtn.addEventListener('click', async () => {
+            const content = (textAdContent && textAdContent.value) ? textAdContent.value.trim() : '';
+            if (!content) { showToast('Please enter text for the ad'); return; }
+            try {
+                const adRef = push(ref(db, 'ads/text'));
+                const _expireDaysEl = document.getElementById('adsExpireDays');
+                const expireDays = parseInt((_expireDaysEl && typeof _expireDaysEl.value !== 'undefined' ? _expireDaysEl.value : '0'), 10) || 0;
+                let expiresAt = null;
+                if (expireDays > 0) {
+                    expiresAt = new Date(Date.now() + expireDays * 86400000).toISOString();
+                }
+                const payload = {
+                    content: content,
+                    adsRedirectLink: adsRedirectLinkInput ? adsRedirectLinkInput.value.trim() : '',
+                    uploadedAt: new Date().toISOString(),
+                    createdBy: localStorage.getItem('cloudvault_user_email') || ''
+                };
+                if (expiresAt) payload.expiresAt = expiresAt;
+                await set(adRef, payload);
+                showToast('Text ad saved');
+                if (textAdContent) textAdContent.value = '';
+            } catch (err) {
+                console.error('[TEXT AD] Save failed', err);
+                showToast('Failed to save text ad');
+            }
+        });
+    }
+
+    // Dropbox upload + Firebase save (with improved error reporting, progress, and error handling)
+    uploadBtn.addEventListener('click', async () => {
+        if (selectedFiles.length === 0) return;
+
+        uploadBtn.disabled = true;
+        resultsList.innerHTML = '';
+
+        try {
+            // Get valid Dropbox token (refreshes if needed)
+            var DROPBOX_ACCESS_TOKEN = await getValidDropboxToken();
+        } catch (err) {
+            alert('Failed to get Dropbox access token. Redirecting to login...');
+            console.error('[UPLOAD]', err);
+            uploadBtn.disabled = false;
+            return;
+        }
+
+        for (const file of selectedFiles) {
+            const fileLabel = `${file.name}`;
+            let dbSaveSuccess = false;
+            try {
+                // Upload to Dropbox
+                const dropboxPath = DROPBOX_CONFIG.getUploadPath(selectedFileType, file.name);
+                console.log(`[UPLOAD] Uploading ${fileLabel} to ${dropboxPath}`);
+                resultsList.innerHTML += `<div class='result-item'><span>${fileLabel}</span> <span style="color:#f59e0b;">⏳ Uploading to Dropbox...</span></div>`;
+
+                const dropboxResponse = await fetch(DROPBOX_CONFIG.api.fileUpload, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${DROPBOX_ACCESS_TOKEN}`,
+                        'Dropbox-API-Arg': JSON.stringify({ path: dropboxPath, mode: 'add', autorename: true, mute: false }),
+                        'Content-Type': 'application/octet-stream'
+                    },
+                    body: file
+                });
+
+                if (!dropboxResponse.ok) {
+                    let text = await dropboxResponse.text();
+                    let parsed = null;
+                    try { parsed = JSON.parse(text); } catch(e) { /* not JSON */ }
+                    const errDetail = parsed ? JSON.stringify(parsed, null, 2) : text;
+                    console.error(`[UPLOAD] Dropbox upload failed for ${fileLabel}:`, dropboxResponse.status, dropboxResponse.statusText, errDetail);
+                    resultsList.innerHTML += `<div class='result-item error'><span>${fileLabel}</span> <span>Dropbox upload failed (${dropboxResponse.status})</span></div>`;
+                    continue;
+                }
+
+                console.log(`[UPLOAD] ✓ Dropbox upload succeeded for ${fileLabel}`);
+                resultsList.innerHTML = resultsList.innerHTML.replace('⏳ Uploading to Dropbox...', '✓ Creating share link...');
+
+                // Get or create share link
+                let shareLink = null;
+                try {
+                    const shareResponse = await fetch(DROPBOX_CONFIG.api.createSharedLink, {
+                        method: 'POST',
+                        headers: {
+                            'Authorization': `Bearer ${DROPBOX_ACCESS_TOKEN}`,
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ path: dropboxPath, settings: { requested_visibility: 'public' } })
+                    });
+
+                    if (shareResponse.ok) {
+                        const shareData = await shareResponse.json();
+                        shareLink = DROPBOX_CONFIG.getShareableUrl(shareData.url);
+                        console.log(`[UPLOAD] ✓ Share link created: ${shareLink}`);
+                    } else {
+                        const shareError = await shareResponse.json().catch(() => ({}));
+                        console.warn('[UPLOAD] Create share link failed:', shareResponse.status, shareError);
+                        
+                        // Try listing existing shared links
+                        try {
+                            const listResp = await fetch(DROPBOX_CONFIG.api.listSharedLinks, {
+                                method: 'POST',
+                                headers: {
+                                    'Authorization': `Bearer ${DROPBOX_ACCESS_TOKEN}`,
+                                    'Content-Type': 'application/json'
+                                },
+                                body: JSON.stringify({ path: dropboxPath })
+                            });
+                            
+                            if (listResp.ok) {
+                                const listData = await listResp.json();
+                                if (listData.links && listData.links.length > 0) {
+                                    shareLink = DROPBOX_CONFIG.getShareableUrl(listData.links[0].url);
+                                    console.log(`[UPLOAD] ✓ Existing share link found: ${shareLink}`);
+                                }
+                            } else {
+                                const listError = await listResp.json().catch(() => ({}));
+                                console.warn('[UPLOAD] List shared links failed:', listResp.status, listError);
+                            }
+                        } catch (listErr) {
+                            console.warn('[UPLOAD] Error listing shared links:', listErr.message);
+                        }
+                    }
+                } catch (e) {
+                    console.warn('[UPLOAD] Error creating/listing share link:', e.message);
+                }
+
+                // Update UI to show Firebase save in progress
+                const resultItem = resultsList.querySelector(`[data-file-name="${fileLabel}"]`) || 
+                                   Array.from(resultsList.querySelectorAll('.result-item')).pop();
+                if (resultItem) {
+                    resultItem.innerHTML = `<span>${fileLabel}</span> <span style="color:#f59e0b;">⏳ Saving to Firebase...</span>`;
+                } else {
+                    resultsList.innerHTML += `<div class='result-item' data-file-name="${fileLabel}"><span>${fileLabel}</span> <span style="color:#f59e0b;">⏳ Saving to Firebase...</span></div>`;
+                }
+
+                // Save to Firebase (only after Dropbox upload succeeds)
+                try {
+                    const fileRef = push(ref(db, `ads/${selectedFileType}`));
+
+                    // Capture adsRedirectLink value from input
+                    const adsRedirectLink = adsRedirectLinkInput.value.trim();
+
+                    const _expireDaysEl = document.getElementById('adsExpireDays');
+                    const expireDays = parseInt((_expireDaysEl && typeof _expireDaysEl.value !== 'undefined' ? _expireDaysEl.value : '0'), 10) || 0;
+                    let expiresAt = null;
+                    if (expireDays > 0) {
+                        expiresAt = new Date(Date.now() + expireDays * 86400000).toISOString();
+                    }
+
+                    const payload = {
+                        fileName: file.name,
+                        fileSize: file.size,
+                        fileType: selectedFileType,
+                        dropboxPath: dropboxPath,
+                        shareLink: shareLink || '',
+                        adsRedirectLink: adsRedirectLink,
+                        uploadedAt: new Date().toISOString()
+                    };
+                    if (expiresAt) payload.expiresAt = expiresAt;
+
+                    const maxAttempts = 3;
+                    const timeoutMs = 15000; // 15s per attempt
+                    let attempt = 0;
+                    let saved = false;
+
+                    while (attempt < maxAttempts && !saved) {
+                        attempt++;
+                        try {
+                            console.log(`[UPLOAD] Firebase save attempt ${attempt} for ${fileLabel}`);
+                            if (resultItem) {
+                                resultItem.innerHTML = `<span>${fileLabel}</span> <span style="color:#f59e0b;">⏳ Saving to Firebase (attempt ${attempt})...</span>`;
+                            }
+
+                            const savePromise = set(fileRef, payload);
+                            await Promise.race([
+                                savePromise,
+                                new Promise((_, reject) => setTimeout(() => reject(new Error('Firebase save timeout')), timeoutMs))
+                            ]);
+
+                            saved = true;
+                            dbSaveSuccess = true;
+                            console.log(`[UPLOAD] ✓ Firebase save succeeded for ${fileLabel} on attempt ${attempt}`);
+
+                            const successHtml = shareLink 
+                                ? `<span>${fileLabel}</span> <a href='${shareLink}' target='_blank' style="color:#10b981; text-decoration:none; font-weight:bold;">✓ Success - Download</a>`
+                                : `<span>${fileLabel}</span> <span style="color:#10b981;">✓ Uploaded (no link)</span>`;
+                            if (expiresAt) {
+                                const expDate = new Date(expiresAt).toLocaleDateString();
+                                successHtml += ` <span style="font-size:0.8rem; color:#64748b;">(expires ${expDate})</span>`;
+                            }
+
+                            if (resultItem) {
+                                resultItem.innerHTML = successHtml;
+                            } else {
+                                resultsList.innerHTML += `<div class='result-item'>${successHtml}</div>`;
+                            }
+
+                        } catch (innerErr) {
+                            console.warn(`[UPLOAD] Firebase save attempt ${attempt} failed for ${fileLabel}:`, innerErr.message || innerErr);
+                            if (attempt >= maxAttempts) {
+                                throw innerErr;
+                            }
+                            // backoff before retrying
+                            const backoffMs = 1000 * attempt; // 1s, 2s, ...
+                            await new Promise(r => setTimeout(r, backoffMs));
+                        }
+                    }
+
+                } catch (e) {
+                    console.error('[UPLOAD] Failed to save metadata to Firebase for', fileLabel, e);
+                    const msg = e && e.message ? e.message : 'Unknown error';
+                    if (resultItem) {
+                        resultItem.innerHTML = `<span>${fileLabel}</span> <span style="color:#ef4444;">⚠️ Saved to Dropbox, but Firebase save failed (${msg})</span>`;
+                    } else {
+                        resultsList.innerHTML += `<div class='result-item error'><span>${fileLabel}</span> <span style="color:#ef4444;">⚠️ Saved to Dropbox, but Firebase save failed (${msg})</span></div>`;
+                    }
+                }
+            } catch (err) {
+                console.error('[UPLOAD] Unexpected error for', fileLabel, err);
+                resultsList.innerHTML += `<div class='result-item error'><span>${fileLabel}</span> <span>Failed (error)</span></div>`;
+            }
+        }
+
+        selectedFiles = [];
+        updateFileList();
+        uploadBtn.disabled = false;
+    });
+
+    // View uploaded files from Firebase
+    const viewDatabaseBtn = document.getElementById('viewDatabaseBtn');
+    const databaseContainer = document.getElementById('databaseContainer');
+    const databaseList = document.getElementById('databaseList');
+
+    viewDatabaseBtn.addEventListener('click', async () => {
+        if (databaseContainer.style.display === 'none' || databaseContainer.style.display === '') {
+            databaseContainer.style.display = 'block';
+            viewDatabaseBtn.textContent = 'Hide Files';
+            await loadDatabaseFiles();
+        } else {
+            databaseContainer.style.display = 'none';
+            viewDatabaseBtn.textContent = 'View Files';
+        }
+    });
+
+    async function loadDatabaseFiles() {
+        try {
+            const snapshot = await get(ref(db, 'ads'));
+            if (!snapshot.exists()) {
+                databaseList.innerHTML = '<div class="empty-state">No files in database</div>';
+                return;
+            }
+
+            let html = '';
+            const data = snapshot.val();
+            
+            for (const [category, files] of Object.entries(data)) {
+                if (typeof files === 'object' && files !== null) {
+                    // Add category header
+                    html += `<div style="font-weight:700;color:#1e293b;margin-top:16px;margin-bottom:8px;font-size:1.1rem;">📁 ${category.toUpperCase()}</div>`;
+                    
+                    for (const [fileKey, fileData] of Object.entries(files)) {
+                        const redirectLinkHtml = fileData.adsRedirectLink ? `<div style="font-size:0.8rem;color:#94a3b8;">Redirect: <a href="${fileData.adsRedirectLink}" target="_blank" style="color:#3b82f6;text-decoration:underline;">${fileData.adsRedirectLink}</a></div>` : '';
+
+                        // Determine display name (support files and text ads)
+                        const displayName = fileData.fileName || (fileData.content ? (fileData.content.length > 80 ? fileData.content.slice(0,77) + '...' : fileData.content) : '(no name)');
+                        const sizeHtml = fileData.fileSize ? ` | Size: <strong>${(fileData.fileSize / 1024 / 1024).toFixed(2)} MB</strong>` : '';
+                        const uploadedAt = fileData.uploadedAt || fileData.createdAt || '';
+                        const expiresAt = fileData.expiresAt || '';
+                        const expired = expiresAt && new Date(expiresAt) < new Date();
+
+                        html += `
+                            <div class="database-item" style="display:flex;justify-content:space-between;align-items:center;padding:12px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;margin-bottom:8px;">
+                                <div style="flex:1;">
+                                    <div style="font-weight:600;color:#0f172a;">${displayName}</div>
+                                    <div style="font-size:0.85rem;color:#64748b;">Type: <strong>${category}</strong>${sizeHtml}</div>
+                                    <div style="font-size:0.8rem;color:#94a3b8;">Uploaded: ${uploadedAt ? new Date(uploadedAt).toLocaleString() : '—'}</div>
+                                        ${expiresAt ? `<div style="font-size:0.8rem;color:${expired ? '#ef4444' : '#94a3b8'};">Expires: ${new Date(expiresAt).toLocaleString()}${expired ? ' (expired)' : ''}</div>` : ''}
+                                    ${redirectLinkHtml}
+                                </div>
+                                <div style="display:flex;gap:8px;">
+                                    ${fileData.shareLink ? `
+                                        <a href="${fileData.shareLink}" target="_blank" style="padding:8px 12px;background:#10b981;color:white;border-radius:6px;text-decoration:none;font-size:0.9rem;">Download</a>
+                                        <button onclick="window.open('${fileData.shareLink}','_blank')" style="padding:8px 12px;background:#3b82f6;color:white;border:none;border-radius:6px;cursor:pointer;font-size:0.9rem;">View</button>
+                                    ` : ''}
+                                    <button onclick="window.deleteFile('${category}', '${fileKey}')" style="padding:8px 12px;background:#ef4444;color:white;border:none;border-radius:6px;cursor:pointer;font-size:0.9rem;">Delete</button>
+                                </div>
+                            </div>
+                        `;
+                    }
+                }
+            }
+            databaseList.innerHTML = html || '<div class="empty-state">No files in database</div>';
+        } catch (error) {
+            console.error('[DB] Error loading files:', error);
+            databaseList.innerHTML = `<div class="empty-state error" style="color:#ef4444;">Error loading files: ${error.message}</div>`;
+        }
+    }
+
+    window.deleteFile = async (category, fileKey) => {
+        if (!confirm('Are you sure you want to delete this file from Dropbox and Firebase?')) return;
+
+        try {
+            const token = await getValidDropboxToken();
+            const snapshot = await get(ref(db, `ads/${category}/${fileKey}`));
+            const fileData = snapshot.val();
+
+            // Delete from Dropbox
+            if (fileData && fileData.dropboxPath) {
+                console.log('[DELETE] Deleting from Dropbox:', fileData.dropboxPath);
+                const deleteResp = await fetch(DROPBOX_CONFIG.api.fileDelete, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ path: fileData.dropboxPath })
+                });
+                if (!deleteResp.ok) {
+                    const error = await deleteResp.json().catch(() => ({}));
+                    console.warn('[DELETE] Dropbox deletion failed:', deleteResp.status, error);
+                }
+            }
+
+            // Delete from Firebase
+            await remove(ref(db, `ads/${category}/${fileKey}`));
+            console.log('[DELETE] ✓ File deleted from Firebase and Dropbox');
+            alert('File deleted successfully');
+            await loadDatabaseFiles();
+        } catch (error) {
+            console.error('[DELETE] Error:', error);
+            alert('Error deleting file: ' + error.message);
+        }
+    };
+    </script>
+</body>
+</html>
